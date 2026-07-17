@@ -85,6 +85,19 @@ SIGNING_MODE=auto ./scripts/build_ipa.sh
 
 脚本会自动选择 `/Applications/Xcode.app`，也可以通过 `DEVELOPER_DIR` 指定其他 Xcode。
 
+### GitHub Actions 自动发布
+
+项目已配置 GitHub Actions。在 GitHub 上推送版本标签即可自动构建并创建 Release：
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+构建使用未签名 IPA，生成的 `Stub.ipa` 会同时出现在 Actions artifact 和 GitHub Release 附件中，导入 AltStore 后由 AltStore 完成签名。
+
+也可以在仓库的 Actions 页面手动运行 `Build and Release IPA`，手动运行会生成构建 artifact；带版本标签运行时才会创建 Release。
+
 ## 💡 设计理念
 
 现代软件让记录变得越来越容易，但也让信息越来越容易被遗忘。
