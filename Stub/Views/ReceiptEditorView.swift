@@ -470,7 +470,10 @@ struct TodoRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
-            Button { item.isCompleted.toggle() } label: {
+            Button {
+                item.toggleCompletionFromCheckbox()
+                try? modelContext.save()
+            } label: {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
                     .foregroundStyle(PaperangColors.ink)

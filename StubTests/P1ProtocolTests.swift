@@ -26,6 +26,18 @@ final class P1ProtocolTests: XCTestCase {
         XCTAssertGreaterThan(RasterRenderer.taskTextRect(atY: 0).width, 0)
     }
 
+    func testCheckboxCompletesProgressWithoutResettingOnUncheck() {
+        let item = TodoItem(text: "阅读", progress: 0.39)
+
+        item.toggleCompletionFromCheckbox()
+        XCTAssertTrue(item.isCompleted)
+        XCTAssertEqual(item.progress, 1, accuracy: 0.0001)
+
+        item.toggleCompletionFromCheckbox()
+        XCTAssertFalse(item.isCompleted)
+        XCTAssertEqual(item.progress, 1, accuracy: 0.0001)
+    }
+
     func testCRCRegistrationMatchesOfficialCapture() {
         let registration = capturedSessionKey ^ P1Protocol.standardCRCKey
         XCTAssertEqual(registration.littleEndianBytes, [0xEE, 0x98, 0xA0, 0xE9])

@@ -145,6 +145,16 @@ final class TodoItem {
     var progressDisplay: String {
         TaskProgressFormatter.display(clampedProgress)
     }
+
+    /// 勾选任务时视为完成；取消勾选只改变完成标记，不回退已经记录的进度。
+    func toggleCompletionFromCheckbox() {
+        if isCompleted {
+            isCompleted = false
+        } else {
+            isCompleted = true
+            progress = 1
+        }
+    }
 }
 
 /// 屏幕预览和热敏小票共用的进度文本格式，避免两端出现不同的列宽和对齐。
