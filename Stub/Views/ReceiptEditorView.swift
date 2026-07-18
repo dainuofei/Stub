@@ -459,8 +459,10 @@ struct SectionEditorView: View {
 }
 
 struct TodoRow: View {
+    @Environment(\.modelContext) private var modelContext
     @Bindable var item: TodoItem
     let onDelete: () -> Void
+    @State private var showProgressEditor = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -488,6 +490,82 @@ struct TodoRow: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("删除任务")
+
+            TaskProgressView(progress: item.clampedProgress) {
+                showProgressEditor = true
+            }
         }
+        .sheet(isPresented: $showProgressEditor) {
+            ProgressEditorSheet(progress: item.clampedProgress) { newProgress in
+                item.progress = newProgress
+                try? modelContext.save()
+            }
+        }
+    }
+}
+
+/// 收据风格的固定宽度进度按钮；放在任务行右侧，不增加任务行高度。
+struct TaskProgressView: View {
+    let progress: Double
+    let onTap: () -> Void
+
+    private var display: String {
+        let value = min(max(progress.isFinite ? progress : 0, 0), 1)
+        let filledCount = Int((value * 10).rounded())
+        let bar = String(repeating: "█", count: filledCount)
+            + String(repeating: "░", count: 10 - filledCount)
+        return "[\(bar)] \(Int((value * 100).rounded()))%"
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            Text(display)
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .foregroundStyle(PaperangColors.ink)
+                .lineLimit(1)
+                .frame(width: 122, alignment: .trailing)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("任务进度 \(display)")
+        .accessibilityHint("点击修改进度")
+    }
+}
+
+struct ProgressEditorSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var draftProgress: Double
+    let onSave: (Double) -> Void
+
+    init(progress: Double, onSave: @escaping (Double) -> Void) {
+        _draftProgress = State(initialValue: min(max(progress.isFinite ? progress : 0, 0), 1))
+        self.onSave = onSave
+    }
+
+    var body: some View {
+        VStack(spacing: 22) {
+            Text("Progress")
+                .font(.headline)
+
+            Text("\(Int((draftProgress * 100).rounded()))%")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .monospacedDigit()
+
+            Slider(value: $draftProgress, in: 0...1, step: 0.01)
+                .tint(PaperangColors.ink)
+
+            HStack(spacing: 12) {
+                Button("取消") { dismiss() }
+                    .buttonStyle(.bordered)
+                Button("保存") {
+                    onSave(draftProgress)
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PaperangColors.ink)
+            }
+        }
+        .padding(24)
+        .presentationDetents([.height(240)])
     }
 }

@@ -20,6 +20,16 @@
 		A1000001000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000E /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		A90000010000000000000001 = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A70000010000000000000001;
+			proxyType = 1;
+			remoteGlobalIDString = A50000010000000000000001;
+			remoteInfo = Stub;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		A20000010000000000000001 /* StubApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubApp.swift; sourceTree = "<group>"; };
 		A20000010000000000000002 /* ReceiptModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptModels.swift; sourceTree = "<group>"; };
@@ -163,6 +173,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				AA0000010000000000000001 /* Stub */,
 			);
 			name = StubTests;
 			productName = StubTests;
@@ -223,6 +234,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0000010000000000000001 = {
+			isa = PBXTargetDependency;
+			target = A50000010000000000000001;
+			targetProxy = A90000010000000000000001;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A30000010000000000000003 /* Sources */ = {

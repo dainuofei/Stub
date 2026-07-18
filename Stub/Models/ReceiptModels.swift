@@ -122,15 +122,31 @@ final class TodoItem {
     var text: String
     var detail: String
     var isCompleted: Bool
+    // 任务的当前推进程度；新增字段有默认值，旧草稿迁移后从 0% 开始。
+    var progress: Double = 0
     var order: Int
     var section: TodoSection?
 
-    init(text: String = "新的任务", detail: String = "", order: Int = 0) {
+    init(text: String = "新的任务", detail: String = "", progress: Double = 0, order: Int = 0) {
         self.id = UUID()
         self.text = text
         self.detail = detail
         self.isCompleted = false
+        self.progress = progress.isFinite ? min(max(progress, 0), 1) : 0
         self.order = order
+    }
+
+    /// 进度只允许落在 0...1，避免旧数据或外部修改破坏打印布局。
+    var clampedProgress: Double {
+        guard progress.isFinite else { return 0 }
+        return min(max(progress, 0), 1)
+    }
+
+    var progressDisplay: String {
+        let filledCount = Int((clampedProgress * 10).rounded())
+        let bar = String(repeating: "█", count: filledCount)
+            + String(repeating: "░", count: 10 - filledCount)
+        return "[\(bar)] \(Int((clampedProgress * 100).rounded()))%"
     }
 }
 

@@ -47,8 +47,9 @@ enum RasterRenderer {
 
                 for item in section.items.sorted(by: { $0.order < $1.order }) {
                     draw("○", at: CGPoint(x: margin, y: y), size: 25, weight: .regular)
-                    draw(item.text, in: CGRect(x: margin + 32, y: y, width: CGFloat(width) - margin * 2 - 105, height: 32), size: 19, weight: .regular)
-                    draw(item.detail, in: CGRect(x: CGFloat(width) - margin - 78, y: y + 3, width: 78, height: 26), size: 14, weight: .regular, alignment: .right)
+                    let taskText = item.detail.isEmpty ? item.text : "\(item.text) \(item.detail)"
+                    draw(taskText, in: CGRect(x: margin + 32, y: y, width: CGFloat(width) - margin * 2 - 164, height: 32), size: 16, weight: .regular, singleLine: true)
+                    draw(item.progressDisplay, in: CGRect(x: CGFloat(width) - margin - 132, y: y + 5, width: 132, height: 20), size: 10, weight: .medium, alignment: .right, monospaced: true, singleLine: true)
                     y += 44
                 }
             }
@@ -97,7 +98,9 @@ enum RasterRenderer {
         size: CGFloat,
         weight: UIFont.Weight,
         alignment: NSTextAlignment = .left,
-        inverted: Bool = false
+        inverted: Bool = false,
+        monospaced: Bool = false,
+        singleLine: Bool = false
     ) {
         if inverted {
             UIColor.black.setFill()
@@ -105,13 +108,16 @@ enum RasterRenderer {
         }
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
-        let attributes = attributes(size: size, weight: weight, tracking: 0, color: inverted ? .white : .black, paragraph: paragraph)
+        if singleLine {
+            paragraph.lineBreakMode = .byTruncatingTail
+        }
+        let attributes = attributes(size: size, weight: weight, tracking: 0, color: inverted ? .white : .black, paragraph: paragraph, monospaced: monospaced)
         NSString(string: text).draw(in: rect, withAttributes: attributes)
     }
 
-    private static func attributes(size: CGFloat, weight: UIFont.Weight, tracking: CGFloat, color: UIColor, paragraph: NSParagraphStyle? = nil) -> [NSAttributedString.Key: Any] {
+    private static func attributes(size: CGFloat, weight: UIFont.Weight, tracking: CGFloat, color: UIColor, paragraph: NSParagraphStyle? = nil, monospaced: Bool = false) -> [NSAttributedString.Key: Any] {
         var values: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: size, weight: weight),
+            .font: monospaced ? UIFont.monospacedSystemFont(ofSize: size, weight: weight) : UIFont.systemFont(ofSize: size, weight: weight),
             .foregroundColor: color,
         ]
         if tracking != 0 { values[.kern] = tracking }

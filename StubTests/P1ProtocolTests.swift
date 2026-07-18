@@ -4,6 +4,17 @@ import XCTest
 final class P1ProtocolTests: XCTestCase {
     private let capturedSessionKey: UInt32 = 0xDCD60DCF
 
+    func testTodoProgressClampsAndFormatsAsFixedWidthBar() {
+        let item = TodoItem(text: "阅读", progress: 0.6)
+        XCTAssertEqual(item.clampedProgress, 0.6, accuracy: 0.0001)
+        XCTAssertEqual(item.progressDisplay, "[██████░░░░] 60%")
+
+        item.progress = 1.4
+        XCTAssertEqual(item.progressDisplay, "[██████████] 100%")
+        item.progress = -0.2
+        XCTAssertEqual(item.progressDisplay, "[░░░░░░░░░░] 0%")
+    }
+
     func testCRCRegistrationMatchesOfficialCapture() {
         let registration = capturedSessionKey ^ P1Protocol.standardCRCKey
         XCTAssertEqual(registration.littleEndianBytes, [0xEE, 0x98, 0xA0, 0xE9])
