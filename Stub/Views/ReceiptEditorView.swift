@@ -480,12 +480,16 @@ struct TodoRow: View {
             TextField("任务", text: $item.text)
                 .font(.system(size: 16, weight: .regular, design: .rounded))
                 .strikethrough(item.isCompleted)
+                // 给任务名保留至少约 6 个中文字符的可视空间，避免被右侧列压缩成两三个字。
+                .frame(minWidth: 96, maxWidth: .infinity, alignment: .leading)
+                .layoutPriority(1)
 
             TextField("时长/次数", text: $item.detail)
                 .font(.system(size: 13, design: .rounded))
                 .multilineTextAlignment(.trailing)
                 .foregroundStyle(PaperangColors.mutedInk)
-                .frame(width: 70)
+                // 与打印端的详情列保持一致，给任务名多留出可视空间。
+                .frame(width: 52)
 
             Button(role: .destructive, action: onDelete) {
                 Image(systemName: "trash")
