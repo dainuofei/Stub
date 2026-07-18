@@ -7,12 +7,23 @@ final class P1ProtocolTests: XCTestCase {
     func testTodoProgressClampsAndFormatsAsFixedWidthBar() {
         let item = TodoItem(text: "阅读", progress: 0.6)
         XCTAssertEqual(item.clampedProgress, 0.6, accuracy: 0.0001)
-        XCTAssertEqual(item.progressDisplay, "[██████░░░░] 60%")
+        XCTAssertEqual(item.progressDisplay, "[██████░░░░]  60%")
 
         item.progress = 1.4
         XCTAssertEqual(item.progressDisplay, "[██████████] 100%")
         item.progress = -0.2
-        XCTAssertEqual(item.progressDisplay, "[░░░░░░░░░░] 0%")
+        XCTAssertEqual(item.progressDisplay, "[░░░░░░░░░░]   0%")
+        XCTAssertEqual(item.progressDisplay.count, TodoItem(text: "阅读", progress: 0.39).progressDisplay.count)
+    }
+
+    func testPrintedProgressAndDetailColumnsShareScreenRightEdge() {
+        let progress = RasterRenderer.progressColumnRect(atY: 0)
+        let subtitleRightEdge = CGFloat(RasterRenderer.width) - RasterRenderer.margin
+        XCTAssertEqual(progress.maxX, subtitleRightEdge, accuracy: 0.001)
+
+        let detail = RasterRenderer.detailColumnRect(atY: 0)
+        XCTAssertEqual(detail.maxX + RasterRenderer.columnGap, progress.minX, accuracy: 0.001)
+        XCTAssertGreaterThan(RasterRenderer.taskTextRect(atY: 0).width, 0)
     }
 
     func testCRCRegistrationMatchesOfficialCapture() {

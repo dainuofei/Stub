@@ -6,6 +6,27 @@ import UIKit
 /// P1 不接收图片文件；所有字体、分隔线和勾选框都必须先在手机上栅格化。
 enum RasterRenderer {
     static let width = P1Protocol.widthDots
+    // 这些列坐标与 ReceiptEditorView 的任务行保持一致：进度百分比的
+    // 右端与分组副标题的右端共用 width - margin 这条竖线。
+    static let margin: CGFloat = 20
+    static let progressColumnWidth: CGFloat = 132
+    static let detailColumnWidth: CGFloat = 52
+    static let columnGap: CGFloat = 10
+
+    static func progressColumnRect(atY y: CGFloat) -> CGRect {
+        CGRect(x: CGFloat(width) - margin - progressColumnWidth, y: y, width: progressColumnWidth, height: 20)
+    }
+
+    static func detailColumnRect(atY y: CGFloat) -> CGRect {
+        let progressX = CGFloat(width) - margin - progressColumnWidth
+        return CGRect(x: progressX - columnGap - detailColumnWidth, y: y, width: detailColumnWidth, height: 32)
+    }
+
+    static func taskTextRect(atY y: CGFloat) -> CGRect {
+        let taskX = margin + 32
+        let detailRect = detailColumnRect(atY: y)
+        return CGRect(x: taskX, y: y, width: detailRect.minX - columnGap - taskX, height: 32)
+    }
 
     @MainActor
     static func render(document: ReceiptDocument) -> Data {
@@ -21,7 +42,6 @@ enum RasterRenderer {
             UIColor.white.setFill()
             context.fill(CGRect(x: 0, y: 0, width: width, height: height))
 
-            let margin: CGFloat = 20
             var y: CGFloat = 16
             draw(document.brand, at: CGPoint(x: margin, y: y), size: 34, weight: .black, centered: true)
             y += 38
@@ -47,10 +67,13 @@ enum RasterRenderer {
 
                 for item in section.items.sorted(by: { $0.order < $1.order }) {
                     draw("○", at: CGPoint(x: margin, y: y), size: 25, weight: .regular)
-                    let taskText = item.detail.isEmpty ? item.text : "\(item.text) \(item.detail)"
-                    draw(taskText, in: CGRect(x: margin + 32, y: y, width: CGFloat(width) - margin * 2 - 164, height: 32), size: 16, weight: .regular, singleLine: true)
-                    // 进度列位置固定，列内左对齐，保证不同任务的进度条起点一致。
-                    draw(item.progressDisplay, in: CGRect(x: CGFloat(width) - margin - 132, y: y + 5, width: 132, height: 20), size: 10, weight: .medium, alignment: .left, monospaced: true, singleLine: true)
+                    draw(item.text, in: taskTextRect(atY: y), size: 16, weight: .regular, singleLine: true)
+                    if !item.detail.isEmpty {
+                        // 时长/次数是独立列，与手机端输入框的位置对应，不再拼接到任务名后面。
+                        draw(item.detail, in: detailColumnRect(atY: y), size: 13, weight: .regular, alignment: .right, singleLine: true)
+                    }
+                    // 固定列整体右对齐，百分比右端与 MUST DO / TRY TODO / Habits 对齐。
+                    draw(item.progressDisplay, in: progressColumnRect(atY: y), size: 10, weight: .medium, alignment: .right, monospaced: true, singleLine: true)
                     y += 44
                 }
             }

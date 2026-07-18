@@ -519,15 +519,7 @@ struct TaskProgressView: View {
     let onTap: () -> Void
 
     private var display: String {
-        let value = min(max(progress.isFinite ? progress : 0, 0), 1)
-        let filledCount = Int((value * 10).rounded())
-        let bar = String(repeating: "█", count: filledCount)
-            + String(repeating: "░", count: 10 - filledCount)
-        // 百分比固定为三位宽度，再整体右对齐；这样每一行的进度条起点
-        // 和百分比右端都能稳定对齐（0%、60%、100% 不会互相跳动）。
-        let percent = String(Int((value * 100).rounded()))
-        let paddedPercent = String(repeating: " ", count: max(0, 3 - percent.count)) + percent
-        return "[\(bar)] \(paddedPercent)%"
+        TaskProgressFormatter.display(progress)
     }
 
     var body: some View {

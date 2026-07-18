@@ -143,10 +143,20 @@ final class TodoItem {
     }
 
     var progressDisplay: String {
-        let filledCount = Int((clampedProgress * 10).rounded())
+        TaskProgressFormatter.display(clampedProgress)
+    }
+}
+
+/// 屏幕预览和热敏小票共用的进度文本格式，避免两端出现不同的列宽和对齐。
+enum TaskProgressFormatter {
+    static func display(_ progress: Double) -> String {
+        let value = min(max(progress.isFinite ? progress : 0, 0), 1)
+        let filledCount = Int((value * 10).rounded())
         let bar = String(repeating: "█", count: filledCount)
             + String(repeating: "░", count: 10 - filledCount)
-        return "[\(bar)] \(Int((clampedProgress * 100).rounded()))%"
+        let percent = String(Int((value * 100).rounded()))
+        let paddedPercent = String(repeating: " ", count: max(0, 3 - percent.count)) + percent
+        return "[\(bar)] \(paddedPercent)%"
     }
 }
 
