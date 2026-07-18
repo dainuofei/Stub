@@ -413,6 +413,8 @@ struct ReceiptPaperView: View {
             }
         }
         .padding(18)
+        // 收据卡片撑满可用宽度，分组标题和任务进度列共享同一条右边界。
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(PaperangColors.paper)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
@@ -455,6 +457,8 @@ struct SectionEditorView: View {
                     .overlay(RoundedRectangle(cornerRadius: 4).stroke(PaperangColors.line, style: StrokeStyle(lineWidth: 1, dash: [3])))
             }
         }
+        // 分组容器也必须占满收据宽度，否则任务行无法把进度列推到右侧。
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -491,10 +495,15 @@ struct TodoRow: View {
             .buttonStyle(.plain)
             .accessibilityLabel("删除任务")
 
+            // 让整个进度列贴右，同时保持列内进度条从左侧起画。
+            Spacer(minLength: 0)
+
             TaskProgressView(progress: item.clampedProgress) {
                 showProgressEditor = true
             }
         }
+        // 任务行撑满收据内容宽度，Spacer 才能把进度列推到最右侧。
+        .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(isPresented: $showProgressEditor) {
             ProgressEditorSheet(progress: item.clampedProgress) { newProgress in
                 item.progress = newProgress
@@ -514,7 +523,11 @@ struct TaskProgressView: View {
         let filledCount = Int((value * 10).rounded())
         let bar = String(repeating: "█", count: filledCount)
             + String(repeating: "░", count: 10 - filledCount)
-        return "[\(bar)] \(Int((value * 100).rounded()))%"
+        // 百分比固定为三位宽度，再整体右对齐；这样每一行的进度条起点
+        // 和百分比右端都能稳定对齐（0%、60%、100% 不会互相跳动）。
+        let percent = String(Int((value * 100).rounded()))
+        let paddedPercent = String(repeating: " ", count: max(0, 3 - percent.count)) + percent
+        return "[\(bar)] \(paddedPercent)%"
     }
 
     var body: some View {
@@ -523,6 +536,7 @@ struct TaskProgressView: View {
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .foregroundStyle(PaperangColors.ink)
                 .lineLimit(1)
+                // 固定列整体贴右；百分比补齐到三位后，进度条起点也保持一致。
                 .frame(width: 122, alignment: .trailing)
                 .contentShape(Rectangle())
         }

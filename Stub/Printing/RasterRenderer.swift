@@ -49,7 +49,8 @@ enum RasterRenderer {
                     draw("○", at: CGPoint(x: margin, y: y), size: 25, weight: .regular)
                     let taskText = item.detail.isEmpty ? item.text : "\(item.text) \(item.detail)"
                     draw(taskText, in: CGRect(x: margin + 32, y: y, width: CGFloat(width) - margin * 2 - 164, height: 32), size: 16, weight: .regular, singleLine: true)
-                    draw(item.progressDisplay, in: CGRect(x: CGFloat(width) - margin - 132, y: y + 5, width: 132, height: 20), size: 10, weight: .medium, alignment: .right, monospaced: true, singleLine: true)
+                    // 进度列位置固定，列内左对齐，保证不同任务的进度条起点一致。
+                    draw(item.progressDisplay, in: CGRect(x: CGFloat(width) - margin - 132, y: y + 5, width: 132, height: 20), size: 10, weight: .medium, alignment: .left, monospaced: true, singleLine: true)
                     y += 44
                 }
             }
