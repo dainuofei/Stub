@@ -19,11 +19,16 @@ final class P1ProtocolTests: XCTestCase {
     func testPrintedProgressAndDetailColumnsShareScreenRightEdge() {
         let progress = RasterRenderer.progressColumnRect(atY: 0)
         let subtitleRightEdge = CGFloat(RasterRenderer.width) - RasterRenderer.margin
+        XCTAssertEqual(RasterRenderer.margin, 18, accuracy: 0.001)
+        XCTAssertEqual(progress.width, 122, accuracy: 0.001)
         XCTAssertEqual(progress.maxX, subtitleRightEdge, accuracy: 0.001)
 
         let detail = RasterRenderer.detailColumnRect(atY: 0)
         XCTAssertEqual(detail.maxX + RasterRenderer.columnGap, progress.minX, accuracy: 0.001)
-        XCTAssertGreaterThan(RasterRenderer.taskTextRect(atY: 0).width, 0)
+        let task = RasterRenderer.taskTextRect(atY: 0)
+        XCTAssertGreaterThan(task.width, 0)
+        XCTAssertEqual(progress.midY, detail.midY, accuracy: 0.001)
+        XCTAssertEqual(progress.midY, task.midY, accuracy: 0.001)
     }
 
     func testCheckboxCompletesProgressWithoutResettingOnUncheck() {

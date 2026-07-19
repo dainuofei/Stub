@@ -8,13 +8,14 @@ enum RasterRenderer {
     static let width = P1Protocol.widthDots
     // 这些列坐标与 ReceiptEditorView 的任务行保持一致：进度百分比的
     // 右端与分组副标题的右端共用 width - margin 这条竖线。
-    static let margin: CGFloat = 20
-    static let progressColumnWidth: CGFloat = 132
+    // 与 ReceiptPaperView 的 18pt 内边距、TaskProgressView 的 122pt 固定列一致。
+    static let margin: CGFloat = 18
+    static let progressColumnWidth: CGFloat = 122
     static let detailColumnWidth: CGFloat = 52
     static let columnGap: CGFloat = 10
 
     static func progressColumnRect(atY y: CGFloat) -> CGRect {
-        CGRect(x: CGFloat(width) - margin - progressColumnWidth, y: y, width: progressColumnWidth, height: 20)
+        CGRect(x: CGFloat(width) - margin - progressColumnWidth, y: y, width: progressColumnWidth, height: 32)
     }
 
     static func detailColumnRect(atY y: CGFloat) -> CGRect {
@@ -55,7 +56,21 @@ enum RasterRenderer {
             y += 36
             draw(ReceiptDocument.todayText(), at: CGPoint(x: margin, y: y), size: 28, weight: .bold)
             y += 39
-            draw(document.slogan, in: CGRect(x: margin, y: y, width: CGFloat(width) - 2 * margin, height: 26), size: 15, weight: .semibold, inverted: true)
+            // 屏幕端口号输入框有 10pt 的水平内边距；打印和相册也使用同一内边距，
+            // 避免口号文字贴在黑条边缘而与 App 预览错位。
+            let sloganRect = CGRect(x: margin, y: y, width: CGFloat(width) - 2 * margin, height: 26)
+            UIColor.black.setFill()
+            UIBezierPath(rect: sloganRect).fill()
+            draw(
+                document.slogan,
+                in: sloganRect.insetBy(dx: 10, dy: 0),
+                size: 14,
+                weight: .semibold,
+                alignment: .left,
+                inverted: true,
+                singleLine: true,
+                verticallyCentered: true
+            )
             y += 39
 
             for section in sections {
@@ -68,18 +83,20 @@ enum RasterRenderer {
                 path.stroke()
                 y += 16
                 draw(section.title, at: CGPoint(x: margin, y: y), size: 25, weight: .black)
-                draw(section.subtitle, in: CGRect(x: CGFloat(width) - 145, y: y + 4, width: 125, height: 24), size: 13, weight: .bold, alignment: .right)
+                draw(section.subtitle, in: CGRect(x: CGFloat(width) - margin - 125, y: y + 4, width: 125, height: 24), size: 13, weight: .bold, alignment: .right)
                 y += 34
 
                 for item in section.items.sorted(by: { $0.order < $1.order }) {
-                    draw("○", at: CGPoint(x: margin, y: y), size: 25, weight: .regular)
-                    draw(item.text, in: taskTextRect(atY: y), size: 16, weight: .regular, singleLine: true)
+                    // SwiftUI 的任务行使用 HStack(alignment: .center)；输出端所有列也共享
+                    // 同一个 32pt 行中心，避免任务名和进度贴在行的上沿。
+                    draw("○", in: CGRect(x: margin, y: y, width: 32, height: 32), size: 25, weight: .regular, singleLine: true, verticallyCentered: true)
+                    draw(item.text, in: taskTextRect(atY: y), size: 16, weight: .regular, singleLine: true, verticallyCentered: true)
                     if !item.detail.isEmpty {
                         // 时长/次数是独立列，与手机端输入框的位置对应，不再拼接到任务名后面。
-                        draw(item.detail, in: detailColumnRect(atY: y), size: 13, weight: .regular, alignment: .right, singleLine: true)
+                        draw(item.detail, in: detailColumnRect(atY: y), size: 13, weight: .regular, alignment: .right, singleLine: true, verticallyCentered: true)
                     }
                     // 固定列整体右对齐，百分比右端与 MUST DO / TRY TODO / Habits 对齐。
-                    draw(item.progressDisplay, in: progressColumnRect(atY: y), size: 10, weight: .medium, alignment: .right, monospaced: true, singleLine: true)
+                    draw(item.progressDisplay, in: progressColumnRect(atY: y), size: 10, weight: .medium, alignment: .right, monospaced: true, singleLine: true, verticallyCentered: true)
                     y += 44
                 }
             }
@@ -137,7 +154,8 @@ enum RasterRenderer {
         alignment: NSTextAlignment = .left,
         inverted: Bool = false,
         monospaced: Bool = false,
-        singleLine: Bool = false
+        singleLine: Bool = false,
+        verticallyCentered: Bool = false
     ) {
         if inverted {
             UIColor.black.setFill()
@@ -149,7 +167,20 @@ enum RasterRenderer {
             paragraph.lineBreakMode = .byTruncatingTail
         }
         let attributes = attributes(size: size, weight: weight, tracking: 0, color: inverted ? .white : .black, paragraph: paragraph, monospaced: monospaced)
-        NSString(string: text).draw(in: rect, withAttributes: attributes)
+        let drawingRect: CGRect
+        if verticallyCentered, let font = attributes[.font] as? UIFont {
+            // NSString.draw(in:) 默认从矩形顶边开始排版；按实际字体行高缩小绘制区，
+            // 才能复现 SwiftUI 文本在 TextField/HStack 中的垂直居中行为。
+            drawingRect = CGRect(
+                x: rect.minX,
+                y: rect.minY + (rect.height - font.lineHeight) / 2,
+                width: rect.width,
+                height: font.lineHeight
+            )
+        } else {
+            drawingRect = rect
+        }
+        NSString(string: text).draw(in: drawingRect, withAttributes: attributes)
     }
 
     private static func attributes(size: CGFloat, weight: UIFont.Weight, tracking: CGFloat, color: UIColor, paragraph: NSParagraphStyle? = nil, monospaced: Bool = false) -> [NSAttributedString.Key: Any] {
