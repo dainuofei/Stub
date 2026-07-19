@@ -2,6 +2,12 @@
 
 > 最后更新：2026-07-19。本文件只记录当前工作状态和接手信息；稳定架构见 `architecture.md`，长期决策见 `decisions.md`，协作流程见根目录 `AGENTS.md`。
 
+## 当前未验收修改
+
+- 已将原 `ReceiptEditorView.swift` 按职责拆分为页面容器、收据编辑组件、打印操作栏、打印机管理界面/协调器和相册保存服务。
+- 未改变 SwiftData Model、打印协议或既有 UI 参数；已更新 Xcode target 文件引用。
+- `build-for-testing` 和完整单元测试已通过；待用户在模拟器/真机检查 UI 与 Paperang P1 实际流程。验收通过前不要提交或推送。
+
 ## 项目与环境
 
 - 本地仓库：`/Users/freopen/Code/paperang-todo`

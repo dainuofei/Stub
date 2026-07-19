@@ -16,6 +16,12 @@
 		A10000010000000000000007 /* PrintCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000007 /* PrintCoordinator.swift */; };
 		A10000010000000000000008 /* RasterRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000008 /* RasterRenderer.swift */; };
 		A10000010000000000000009 /* P1ProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000009 /* P1ProtocolTests.swift */; };
+		A1000001000000000000000C /* PrintActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000F /* PrintActionBar.swift */; };
+		A1000001000000000000000D /* PrinterManagementSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000010 /* PrinterManagementSheet.swift */; };
+		A1000001000000000000000E /* ReceiptPaperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000011 /* ReceiptPaperView.swift */; };
+		A1000001000000000000000F /* TodoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000012 /* TodoRow.swift */; };
+		A10000010000000000000010 /* PrinterManagementCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000013 /* PrinterManagementCoordinator.swift */; };
+		A10000010000000000000011 /* PhotoLibrarySaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000014 /* PhotoLibrarySaver.swift */; };
 		A1000001000000000000000A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000A /* XCTest.framework */; };
 		A1000001000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000E /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -45,6 +51,12 @@
 		A2000001000000000000000C /* StubTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StubTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000001000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A2000001000000000000000F /* PrintActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintActionBar.swift; sourceTree = "<group>"; };
+		A20000010000000000000010 /* PrinterManagementSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrinterManagementSheet.swift; sourceTree = "<group>"; };
+		A20000010000000000000011 /* ReceiptPaperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptPaperView.swift; sourceTree = "<group>"; };
+		A20000010000000000000012 /* TodoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoRow.swift; sourceTree = "<group>"; };
+		A20000010000000000000013 /* PrinterManagementCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrinterManagementCoordinator.swift; sourceTree = "<group>"; };
+		A20000010000000000000014 /* PhotoLibrarySaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrarySaver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +103,7 @@
 				A40000010000000000000005 /* Models */,
 				A40000010000000000000006 /* Views */,
 				A40000010000000000000007 /* Printing */,
+				A40000010000000000000009 /* Services */,
 				A2000001000000000000000D /* Info.plist */,
 				A2000001000000000000000E /* Assets.xcassets */,
 			);
@@ -127,8 +140,20 @@
 			children = (
 				A20000010000000000000003 /* ContentView.swift */,
 				A20000010000000000000004 /* ReceiptEditorView.swift */,
+				A2000001000000000000000F /* PrintActionBar.swift */,
+				A20000010000000000000010 /* PrinterManagementSheet.swift */,
+				A40000010000000000000008 /* Receipt */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000008 /* Receipt */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000011 /* ReceiptPaperView.swift */,
+				A20000010000000000000012 /* TodoRow.swift */,
+			);
+			path = Receipt;
 			sourceTree = "<group>";
 		};
 		A40000010000000000000007 /* Printing */ = {
@@ -137,9 +162,18 @@
 				A20000010000000000000005 /* P1Protocol.swift */,
 				A20000010000000000000006 /* P1Printer.swift */,
 				A20000010000000000000007 /* PrintCoordinator.swift */,
+				A20000010000000000000013 /* PrinterManagementCoordinator.swift */,
 				A20000010000000000000008 /* RasterRenderer.swift */,
 			);
 			path = Printing;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000009 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000014 /* PhotoLibrarySaver.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -256,6 +290,12 @@
 				A10000010000000000000006 /* P1Printer.swift in Sources */,
 				A10000010000000000000007 /* PrintCoordinator.swift in Sources */,
 				A10000010000000000000008 /* RasterRenderer.swift in Sources */,
+				A1000001000000000000000C /* PrintActionBar.swift in Sources */,
+				A1000001000000000000000D /* PrinterManagementSheet.swift in Sources */,
+				A1000001000000000000000E /* ReceiptPaperView.swift in Sources */,
+				A1000001000000000000000F /* TodoRow.swift in Sources */,
+				A10000010000000000000010 /* PrinterManagementCoordinator.swift in Sources */,
+				A10000010000000000000011 /* PhotoLibrarySaver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

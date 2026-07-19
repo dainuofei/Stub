@@ -26,7 +26,7 @@ SwiftData 模型定义在 `Stub/Models/ReceiptModels.swift`：
 - `TodoItem`：任务名、时长/次数、完成状态、`0...1` 进度和顺序。
 - `PrintHistoryEntry`：只在打印真正完成后记录；保存相册不写打印历史。
 
-`ContentView` 读取最近更新的收据；不存在时创建默认文档。`ReceiptEditorView` 负责编辑、每日重置、打印、相册保存和打印机管理。
+`ContentView` 读取最近更新的收据；不存在时创建默认文档。收据编辑页面由多个按职责拆分的 SwiftUI 组件组成：`ReceiptEditorView` 负责页面编排、生命周期和持久化触发；`Views/Receipt/` 负责收据、分组、任务行和进度编辑；`PrintActionBar` 负责底部操作状态；`PrinterManagementSheet` 与 `Printing/PrinterManagementCoordinator` 负责设备管理界面和设备操作；`Services/PhotoLibrarySaver` 封装相册权限与保存。
 
 重要行为：
 
