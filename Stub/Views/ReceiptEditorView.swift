@@ -174,22 +174,37 @@ struct PrintActionBar: View {
                         .foregroundStyle(PaperangColors.mutedInk)
                 }
 
-                HStack(spacing: 8) {
-                    Button(action: onSave) {
-                        Label(photoSaveState.label, systemImage: "photo.on.rectangle")
-                            .font(.caption.weight(.semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.72)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
+                // 将两个次要操作并排放在上方，把主要的打印操作单独放在下方，
+                // 让打印按钮获得完整宽度并降低误触相邻按钮的概率。
+                VStack(spacing: 8) {
+                    HStack(spacing: 8) {
+                        Button(action: onSave) {
+                            Label(photoSaveState.label, systemImage: "photo.on.rectangle")
+                                .font(.headline.weight(.semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(PaperangColors.ink)
+                        .disabled(photoSaveState == .saving)
+
+                        Button(action: onManage) {
+                            Label("管理喵喵机", systemImage: "slider.horizontal.3")
+                                .font(.headline.weight(.semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(PaperangColors.ink)
                     }
-                    .buttonStyle(.bordered)
-                    .tint(PaperangColors.ink)
-                    .disabled(photoSaveState == .saving)
 
                     Button(action: onPrint) {
                         Label("打印到喵喵机", systemImage: "printer.fill")
-                            .font(.caption.weight(.semibold))
+                            .font(.headline.weight(.semibold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.72)
                             .frame(maxWidth: .infinity)
@@ -198,17 +213,6 @@ struct PrintActionBar: View {
                     .buttonStyle(.borderedProminent)
                     .tint(PaperangColors.ink)
                     .foregroundStyle(.white)
-
-                    Button(action: onManage) {
-                        Label("管理喵喵机", systemImage: "slider.horizontal.3")
-                            .font(.caption.weight(.semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.72)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(PaperangColors.ink)
                 }
             }
         }
