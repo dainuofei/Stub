@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import Photos
+import UIKit
 
 struct ReceiptEditorView: View {
     @Environment(\.modelContext) private var modelContext
@@ -7,6 +9,8 @@ struct ReceiptEditorView: View {
     @Bindable var document: ReceiptDocument
     @StateObject private var printCoordinator = PrintCoordinator()
     @State private var showPrinterManagement = false
+    @State private var photoSaveState: PhotoSaveState = .idle
+    @State private var photoSaveError: String?
     @AppStorage("paperang.printDensity") private var printDensity: Double = 100
     private let dayChangeTimer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
@@ -22,7 +26,9 @@ struct ReceiptEditorView: View {
                 // only appears after the user has reached the bottom.
                 PrintActionBar(
                     state: printCoordinator.state,
+                    photoSaveState: photoSaveState,
                     onManage: { showPrinterManagement = true },
+                    onSave: { saveToPhotos() },
                     onPrint: { startPrint() },
                     onCancel: { printCoordinator.cancelPrint() }
                 )
@@ -64,12 +70,39 @@ struct ReceiptEditorView: View {
         } message: {
             Text(printCoordinator.errorMessage ?? "")
         }
+        .alert("保存到相册", isPresented: Binding(
+            get: { photoSaveError != nil },
+            set: { if !$0 { photoSaveError = nil } }
+        )) {
+            Button("好") { photoSaveError = nil }
+        } message: {
+            Text(photoSaveError ?? "")
+        }
     }
 
     private func startPrint() {
         document.touch()
         try? modelContext.save()
         printCoordinator.startPrint(document: document, density: UInt8(clamping: Int(printDensity.rounded())))
+    }
+
+    private func saveToPhotos() {
+        guard photoSaveState != .saving else { return }
+        photoSaveState = .saving
+        photoSaveError = nil
+
+        Task { @MainActor in
+            do {
+                let photoImage = RasterRenderer.renderImage(document: document, scale: 3)
+                try await PhotoLibrarySaver.save(photoImage)
+                photoSaveState = .saved
+            } catch is CancellationError {
+                photoSaveState = .idle
+            } catch {
+                photoSaveState = .failed
+                photoSaveError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
+        }
     }
 
     private func resetForNewDayIfNeeded() {
@@ -112,7 +145,9 @@ struct ReceiptEditorView: View {
 
 struct PrintActionBar: View {
     let state: PrintState
+    let photoSaveState: PhotoSaveState
     let onManage: () -> Void
+    let onSave: () -> Void
     let onPrint: () -> Void
     let onCancel: () -> Void
 
@@ -139,10 +174,24 @@ struct PrintActionBar: View {
                         .foregroundStyle(PaperangColors.mutedInk)
                 }
 
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
+                    Button(action: onSave) {
+                        Label(photoSaveState.label, systemImage: "photo.on.rectangle")
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(PaperangColors.ink)
+                    .disabled(photoSaveState == .saving)
+
                     Button(action: onPrint) {
                         Label("打印到喵喵机", systemImage: "printer.fill")
-                            .font(.subheadline.weight(.semibold))
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                     }
@@ -152,7 +201,9 @@ struct PrintActionBar: View {
 
                     Button(action: onManage) {
                         Label("管理喵喵机", systemImage: "slider.horizontal.3")
-                            .font(.subheadline.weight(.semibold))
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                     }
@@ -165,6 +216,56 @@ struct PrintActionBar: View {
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
+    }
+}
+
+enum PhotoSaveState: Equatable {
+    case idle
+    case saving
+    case saved
+    case failed
+
+    var label: String {
+        switch self {
+        case .idle, .failed: return "保存到相册"
+        case .saving: return "保存中…"
+        case .saved: return "已保存"
+        }
+    }
+}
+
+enum PhotoLibrarySaveError: LocalizedError {
+    case permissionDenied
+    case saveFailed(Error?)
+
+    var errorDescription: String? {
+        switch self {
+        case .permissionDenied:
+            return "没有照片权限，请在系统设置中允许 Stub 添加照片。"
+        case .saveFailed(let error):
+            return error?.localizedDescription ?? "保存照片失败，请稍后重试。"
+        }
+    }
+}
+
+enum PhotoLibrarySaver {
+    static func save(_ image: UIImage) async throws {
+        let authorization = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        guard authorization == .authorized || authorization == .limited else {
+            throw PhotoLibrarySaveError.permissionDenied
+        }
+
+        try await withCheckedThrowingContinuation { continuation in
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            }) { success, error in
+                if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: PhotoLibrarySaveError.saveFailed(error))
+                }
+            }
+        }
     }
 }
 

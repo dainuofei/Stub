@@ -20,6 +20,8 @@
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>用于连接喵喵机 P1 并打印 Todo 纸条。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>用于将与喵喵机打印内容一致的 Todo 小票保存到相册。</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

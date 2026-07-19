@@ -28,8 +28,9 @@ enum RasterRenderer {
         return CGRect(x: taskX, y: y, width: detailRect.minX - columnGap - taskX, height: 32)
     }
 
+    /// 生成收据图。scale=1 是喵喵机的 384 点打印源，scale=3 用于相册高分辨率保存。
     @MainActor
-    static func render(document: ReceiptDocument) -> Data {
+    static func renderImage(document: ReceiptDocument, scale: CGFloat = 1) -> UIImage {
         // 先按屏幕预览的顺序绘制完整收据，再统一转换为热敏点阵，
         // 这样打印内容与用户编辑时看到的布局保持一致。
         let sections = document.sections.sorted { $0.order < $1.order }
@@ -37,8 +38,13 @@ enum RasterRenderer {
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: width, height: height), format: format)
+        let renderer = UIGraphicsImageRenderer(
+            size: CGSize(width: CGFloat(width) * scale, height: CGFloat(height) * scale),
+            format: format
+        )
         let image = renderer.image { context in
+            // 在放大的画布上重新绘制文字和线条，而不是把低分辨率打印点阵插值放大。
+            context.cgContext.scaleBy(x: scale, y: scale)
             UIColor.white.setFill()
             context.fill(CGRect(x: 0, y: 0, width: width, height: height))
 
@@ -93,7 +99,14 @@ enum RasterRenderer {
             )
         }
 
-        return pack(image: image, width: width, height: height)
+        return image
+    }
+
+    /// 将同一张收据图转换为 P1 所需的点阵数据。
+    @MainActor
+    static func render(document: ReceiptDocument) -> Data {
+        let image = renderImage(document: document, scale: 1)
+        return pack(image: image, width: Int(image.size.width), height: Int(image.size.height))
     }
 
     private static func draw(

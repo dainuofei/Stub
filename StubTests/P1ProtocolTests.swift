@@ -38,6 +38,15 @@ final class P1ProtocolTests: XCTestCase {
         XCTAssertEqual(item.progress, 1, accuracy: 0.0001)
     }
 
+    @MainActor
+    func testPhotoReceiptRendererRedrawsAtThreeTimes() {
+        let document = ReceiptDocument(sections: [])
+        let result = RasterRenderer.renderImage(document: document, scale: 3)
+
+        XCTAssertEqual(result.size.width, CGFloat(RasterRenderer.width * 3), accuracy: 0.001)
+        XCTAssertEqual(result.size.height, 540, accuracy: 0.001)
+    }
+
     func testCRCRegistrationMatchesOfficialCapture() {
         let registration = capturedSessionKey ^ P1Protocol.standardCRCKey
         XCTAssertEqual(registration.littleEndianBytes, [0xEE, 0x98, 0xA0, 0xE9])
